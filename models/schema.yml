@@ -3,21 +3,16 @@ version: 2
 sources:
   - name: raw
     schema: gz_raw_data
-    freshness:   # Tüm kaynaklar için genel ayar (opsiyonel)
-      warn_after: {count: 1, period: day}
-      error_after: {count: 3, period: day}
 
     tables:
       - name: sales
         identifier: raw_gz_sales
         description: sales of Greenweez / one row per product_id per orders_id
         
-        loaded_at_field: TIMESTAMP(date_date)  # 👈 Zaman damgası bu sütundan alınacak
+        loaded_at_field: CAST(date_date as TIMESTAMP) 
         
-        freshness:                  # (Opsiyonel, sadece sales özelinde)
-          warn_after: {count: 1, period: day}   # 1 günden eskiyse uyar
-          error_after: {count: 3, period: day}  # 3 günden eskiyse hata
-
+        freshness:                  
+          warn_after: {count: 90, period: day}
         columns:
           - name: date_date
             description: date of purchase
