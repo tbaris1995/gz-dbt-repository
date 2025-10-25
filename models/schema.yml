@@ -1,14 +1,23 @@
 version: 2
 
-version: 2
-
 sources:
   - name: raw
     schema: gz_raw_data
+    freshness:   # Tüm kaynaklar için genel ayar (opsiyonel)
+      warn_after: {count: 1, period: day}
+      error_after: {count: 3, period: day}
+
     tables:
       - name: sales
         identifier: raw_gz_sales
         description: sales of Greenweez / one row per product_id per orders_id
+        
+        loaded_at_field: TIMESTAMP(date_date)  # 👈 Zaman damgası bu sütundan alınacak
+        
+        freshness:                  # (Opsiyonel, sadece sales özelinde)
+          warn_after: {count: 1, period: day}   # 1 günden eskiyse uyar
+          error_after: {count: 3, period: day}  # 3 günden eskiyse hata
+
         columns:
           - name: date_date
             description: date of purchase
@@ -17,9 +26,9 @@ sources:
           - name: pdt_id
             description: foreign key to product
           - name: revenue
-            description: the amount paid by the customer to purchase the product (revenue = quantity * selling_price)
+            description: revenue = quantity * selling_price
           - name: quantity
-            description: the quantity of products purchased for a given order
+            description: products purchased per order
 
       - name: product
         identifier: raw_gz_product
@@ -27,8 +36,11 @@ sources:
         columns:
           - name: products_id
             description: Primary key
+            tests:
+              - unique
+              - not_null    
           - name: purchase_price
-            description: the purchase price of the product
+            description: the purchase price of the product  
 
       - name: ship
         identifier: raw_gz_ship
@@ -36,10 +48,12 @@ sources:
         columns:
           - name: orders_id
             description: Primary key
+            tests:
+              - unique
+              - not_null      
           - name: shipping_fee
             description: price the customer pays for shipping
           - name: log_cost
             description: cost of preparing the parcel in the warehouse
           - name: ship_cost
             description: shipping cost paid by Greenweez to carrier
-
